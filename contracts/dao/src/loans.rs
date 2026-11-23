@@ -1,4 +1,4 @@
-use soroban_sdk::{symbol_short, Address, Env, String, Vec};
+use soroban_sdk::{Address, Env, String, Vec};
 
 use crate::error::Error;
 use crate::storage;
@@ -181,12 +181,12 @@ pub fn request_loan_in_asset(
     if asset != storage::get_token(env)? {
         storage::set_loan_asset(env, id, &asset);
         env.events()
-            .publish((symbol_short!("loan_asst"),), (id, asset.clone()));
+            .publish((crate::events::LOAN_ASST,), (id, asset.clone()));
     }
     storage::extend_instance(env);
 
     env.events().publish(
-        (symbol_short!("loan_req"),),
+        (crate::events::LOAN_REQ,),
         (id, borrower, amount, terms.total_repayment, asset),
     );
     Ok(id)
@@ -239,7 +239,7 @@ pub fn edit_loan_proposal(
     storage::set_loan_proposal(env, &proposal);
 
     env.events().publish(
-        (symbol_short!("loan_edit"),),
+        (crate::events::LOAN_EDIT,),
         (proposal_id, borrower, new_amount, terms.total_repayment),
     );
     Ok(())
@@ -272,7 +272,7 @@ pub fn cancel_loan_proposal(env: &Env, borrower: Address, proposal_id: u32) -> R
     storage::set_loan_proposal(env, &proposal);
 
     env.events()
-        .publish((symbol_short!("prop_canc"),), (proposal_id, now));
+        .publish((crate::events::PROP_CANC,), (proposal_id, now));
     Ok(())
 }
 
@@ -370,7 +370,7 @@ fn vote_on_loan_proposal_internal(
     proposal.votes_cast += 1;
     storage::set_loan_voted(env, proposal_id, voter);
     env.events().publish(
-        (symbol_short!("loan_vote"),),
+        (crate::events::LOAN_VOTE,),
         (proposal_id, voter.clone(), support),
     );
 
@@ -391,7 +391,7 @@ fn vote_on_loan_proposal_internal(
             proposal.status = ProposalStatus::Approved;
         } else {
             env.events().publish(
-                (symbol_short!("loan_wait"),),
+                (crate::events::LOAN_WAIT,),
                 (proposal.id, proposal.amount),
             );
         }
@@ -402,7 +402,7 @@ fn vote_on_loan_proposal_internal(
             proposal.status = ProposalStatus::Rejected;
             proposal.phase = ProposalPhase::Expired;
             env.events().publish(
-                (symbol_short!("loan_rej"),),
+                (crate::events::LOAN_REJ,),
                 (proposal.id, proposal.for_votes, proposal.against_votes),
             );
         }
@@ -510,7 +510,7 @@ fn approve_and_disburse(env: &Env, proposal: &LoanProposal) -> Result<(), Error>
     );
 
     env.events().publish(
-        (symbol_short!("loan_appr"),),
+        (crate::events::LOAN_APPR,),
         (
             id,
             proposal.borrower.clone(),
@@ -677,7 +677,7 @@ fn repay_loan_internal(
     util::token_client_for(env, &asset).transfer(&borrower, util::contract_address(env), &amount);
 
     env.events().publish(
-        (symbol_short!("loan_rpy"),),
+        (crate::events::LOAN_RPY,),
         (loan_id, borrower, remaining, asset),
     );
     Ok(())
@@ -708,7 +708,7 @@ pub fn expire_loan_proposal(env: &Env, proposal_id: u32) -> Result<(), Error> {
     storage::extend_instance(env);
 
     env.events().publish(
-        (symbol_short!("loan_exp"),),
+        (crate::events::LOAN_EXP,),
         (proposal_id, proposal.borrower),
     );
     Ok(())
@@ -797,7 +797,7 @@ pub fn mark_loan_defaulted(env: &Env, loan_id: u32) -> Result<(), Error> {
     storage::extend_instance(env);
 
     env.events().publish(
-        (symbol_short!("loan_dflt"),),
+        (crate::events::LOAN_DFLT,),
         (loan_id, loan.borrower.clone(), penalty),
     );
     Ok(())
@@ -860,7 +860,7 @@ pub(crate) fn distribute_interest(env: &Env, interest: i128, asset: &Address) {
 
     // Unconditionally publish the event so the indexer sees the interest paid
     env.events().publish(
-        (symbol_short!("interest"),),
+        (crate::events::INTEREST,),
         (interest, active, asset.clone()),
     );
 }

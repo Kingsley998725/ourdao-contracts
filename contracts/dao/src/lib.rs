@@ -16,6 +16,7 @@
 mod admin;
 mod docs;
 mod error;
+mod events;
 mod loans;
 mod membership;
 mod migration;
@@ -323,8 +324,7 @@ impl OurDao {
     #[allow(deprecated)]
     pub fn bump_dao_ttl(env: Env) {
         storage::extend_instance(&env);
-        env.events()
-            .publish((soroban_sdk::symbol_short!("TtlBumped"),), ());
+        env.events().publish((events::TTL_BUMPED,), ());
     }
 
     // ==================== native swap: staking ====================

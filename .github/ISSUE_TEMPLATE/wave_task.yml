@@ -1,0 +1,50 @@
+name: Wave task
+description: A scoped Stellar Wave or bounty task
+title: "[Wave task]: "
+labels: ["task"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain the problem and any relevant background.
+    validations:
+      required: true
+  - type: textarea
+    id: files-to-change
+    attributes:
+      label: Files to change
+      description: List the expected files or modules, one per line.
+      placeholder: |
+        - path/to/file
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: List the concrete work needed to complete this issue.
+      placeholder: |
+        - [ ] Task
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define objective checks for completion.
+      placeholder: |
+        - [ ] Criterion
+    validations:
+      required: true
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      description: Estimate the relative effort for this task.
+      options:
+        - Easy
+        - Medium
+        - Hard
+    validations:
+      required: true

@@ -436,7 +436,7 @@ Found a vulnerability? See [SECURITY.md](./SECURITY.md) for scope and how to rep
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, the checks CI enforces, and the contract-specific rules (append-only error codes, events on every state change, TTL discipline). Please claim an issue before opening a pull request.
+Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, the checks CI enforces, and the contract-specific rules (append-only error codes, events on every state change, TTL discipline). Stellar Wave contributors should follow the [Stellar Wave workflow](./CONTRIBUTING.md#stellar-wave). Please claim an issue before opening a pull request.
 
 Found a security vulnerability? See [SECURITY.md](./SECURITY.md) — don't open a public issue.
 

@@ -1,4 +1,4 @@
-use soroban_sdk::{symbol_short, token, Address, Env, Vec};
+use soroban_sdk::{token, Address, Env, Vec};
 
 /// Maximum number of admins to keep the admin-list bounded in instance storage (#68).
 pub const MAX_ADMINS: u32 = 20;
@@ -103,7 +103,7 @@ pub fn initialize(
     extend_instance(env);
 
     env.events().publish(
-        (symbol_short!("init"),),
+        (crate::events::INIT,),
         (admins, consensus_threshold, membership_fee, token),
     );
     Ok(())
@@ -122,7 +122,7 @@ pub fn add_admin(env: &Env, caller: Address, admin: Address) -> Result<(), Error
     admins.push_back(admin.clone());
     storage::set_admins(env, &admins);
     extend_instance(env);
-    env.events().publish((symbol_short!("admin_add"),), admin);
+    env.events().publish((crate::events::ADMIN_ADD,), admin);
     Ok(())
 }
 
@@ -141,7 +141,7 @@ pub fn remove_admin(env: &Env, caller: Address, admin: Address) -> Result<(), Er
     admins.remove(i);
     storage::set_admins(env, &admins);
     extend_instance(env);
-    env.events().publish((symbol_short!("admin_rem"),), admin);
+    env.events().publish((crate::events::ADMIN_REM,), admin);
     Ok(())
 }
 
@@ -155,7 +155,7 @@ pub fn set_pauser(env: &Env, caller: Address, pauser: Address) -> Result<(), Err
     storage::set_pauser(env, &pauser);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("pset"),), (old_pauser, pauser));
+        .publish((crate::events::PSET,), (old_pauser, pauser));
     Ok(())
 }
 
@@ -166,7 +166,7 @@ pub fn revoke_pauser(env: &Env, caller: Address) -> Result<(), Error> {
     storage::remove_pauser(env);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("prev"),), (old_pauser, caller));
+        .publish((crate::events::PREV,), (old_pauser, caller));
     Ok(())
 }
 
@@ -180,7 +180,7 @@ pub fn set_consensus_threshold(env: &Env, caller: Address, threshold: u32) -> Re
     storage::set_threshold(env, threshold);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("threshold"),), (old_threshold, threshold));
+        .publish((crate::events::THRESHOLD,), (old_threshold, threshold));
     Ok(())
 }
 
@@ -207,7 +207,7 @@ pub fn propose_policy_update(env: &Env, caller: Address, policy: LoanPolicy) -> 
     storage::set_pending_policy_update(env, &update);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("pol_prop"),), (caller, execution_time));
+        .publish((crate::events::POL_PROP,), (caller, execution_time));
     Ok(())
 }
 
@@ -224,7 +224,7 @@ pub fn execute_policy_update(env: &Env, caller: Address) -> Result<(), Error> {
     storage::remove_pending_policy_update(env);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("policy"),), (old_policy, update.policy));
+        .publish((crate::events::POLICY,), (old_policy, update.policy));
     Ok(())
 }
 
@@ -236,7 +236,7 @@ pub fn cancel_policy_update(env: &Env, caller: Address) -> Result<(), Error> {
     }
     storage::remove_pending_policy_update(env);
     extend_instance(env);
-    env.events().publish((symbol_short!("pol_canc"),), caller);
+    env.events().publish((crate::events::POL_CANC,), caller);
     Ok(())
 }
 
@@ -256,7 +256,7 @@ pub fn pause(env: &Env, caller: Address) -> Result<(), Error> {
     }
     storage::set_paused(env, true);
     extend_instance(env);
-    env.events().publish((symbol_short!("paused"),), caller);
+    env.events().publish((crate::events::PAUSED,), caller);
     Ok(())
 }
 
@@ -275,7 +275,7 @@ pub fn unpause(env: &Env, caller: Address) -> Result<(), Error> {
     }
     storage::set_paused(env, false);
     extend_instance(env);
-    env.events().publish((symbol_short!("unpaused"),), caller);
+    env.events().publish((crate::events::UNPAUSED,), caller);
     Ok(())
 }
 
@@ -297,7 +297,7 @@ pub fn propose_token_addition(env: &Env, caller: Address, token: Address) -> Res
     storage::set_pending_token_addition(env, &token, execution_time);
     extend_instance(env);
     env.events().publish(
-        (symbol_short!("tok_prop"),),
+        (crate::events::TOK_PROP,),
         (caller, token, execution_time),
     );
     Ok(())
@@ -317,7 +317,7 @@ pub fn execute_token_addition(env: &Env, caller: Address, token: Address) -> Res
     storage::set_token_whitelisted(env, &token, true);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("tok_add"),), (caller, token));
+        .publish((crate::events::TOK_ADD,), (caller, token));
     Ok(())
 }
 
@@ -340,6 +340,6 @@ pub fn remove_token(env: &Env, caller: Address, token: Address) -> Result<(), Er
     storage::set_token_whitelisted(env, &token, false);
     extend_instance(env);
     env.events()
-        .publish((symbol_short!("tok_rem"),), (caller, token));
+        .publish((crate::events::TOK_REM,), (caller, token));
     Ok(())
 }

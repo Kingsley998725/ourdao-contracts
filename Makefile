@@ -1,7 +1,7 @@
 WASM_TARGET := wasm32v1-none
 WASM := target/$(WASM_TARGET)/release/ourdao_dao.wasm
 
-.PHONY: all build test fmt clippy audit ci clean optimize size costs bindings
+.PHONY: all build test fmt clippy check coverage audit ci clean optimize size costs bindings
 
 all: fmt clippy test build
 
@@ -38,9 +38,15 @@ fmt:
 clippy:
 	cargo clippy --all-targets --locked -- -D warnings
 
-# Reproduces the full CI sequence locally (minus coverage and supply-chain jobs).
+check:
+	cargo check --locked --all-targets
+
+coverage:
+	cargo llvm-cov --locked --all-targets --html --fail-under-lines 95
+
+# Reproduces the local build-and-test CI gates (the reproducible build uses Docker).
 # Use this before pushing to confirm CI will pass.
-ci: fmt clippy test build
+ci: check fmt clippy test coverage build
 
 # Requires `cargo install cargo-audit --locked` once.
 audit:

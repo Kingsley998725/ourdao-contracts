@@ -1,4 +1,4 @@
-use soroban_sdk::{symbol_short, Address, Env, String};
+use soroban_sdk::{Address, Env, String};
 
 use crate::error::Error;
 use crate::privacy;
@@ -81,12 +81,12 @@ pub fn propose_withdrawal_in_asset(
     if asset != storage::get_token(env)? {
         storage::set_treasury_asset(env, id, &asset);
         env.events()
-            .publish((symbol_short!("tre_asset"),), (id, asset));
+            .publish((crate::events::TRE_ASSET,), (id, asset));
     }
     storage::extend_instance(env);
 
     env.events().publish(
-        (symbol_short!("tre_prop"),),
+        (crate::events::TRE_PROP,),
         (id, amount, destination, private),
     );
     Ok(id)
@@ -149,7 +149,7 @@ pub fn tally(
     proposal.votes_cast += 1;
     storage::set_treasury_voted(env, proposal.id, voter);
     env.events().publish(
-        (symbol_short!("tre_vote"),),
+        (crate::events::TRE_VOTE,),
         (proposal.id, voter.clone(), support),
     );
 
@@ -161,7 +161,7 @@ pub fn tally(
         proposal.status = ProposalStatus::ApprovedPendingDisbursement;
         if execute(env, &mut proposal).is_err() {
             env.events()
-                .publish((symbol_short!("tre_wait"),), (proposal.id, proposal.amount));
+                .publish((crate::events::TRE_WAIT,), (proposal.id, proposal.amount));
         }
     } else {
         let remaining = proposal.active_members.saturating_sub(proposal.votes_cast);
@@ -169,7 +169,7 @@ pub fn tally(
         if proposal.for_votes + max_remaining < required {
             proposal.status = ProposalStatus::Rejected;
             env.events().publish(
-                (symbol_short!("tre_rej"),),
+                (crate::events::TRE_REJ,),
                 (proposal.id, proposal.for_votes, proposal.against_votes),
             );
         }
@@ -231,7 +231,7 @@ fn execute(env: &Env, proposal: &mut TreasuryProposal) -> Result<(), Error> {
         &proposal.amount,
     );
     env.events().publish(
-        (symbol_short!("tre_exec"),),
+        (crate::events::TRE_EXEC,),
         (proposal.id, proposal.amount, proposal.destination.clone()),
     );
     Ok(())
@@ -270,7 +270,7 @@ pub fn cancel_treasury_proposal(
     storage::set_treasury_proposal(env, &proposal);
 
     env.events()
-        .publish((symbol_short!("prop_canc"),), (proposal_id, now));
+        .publish((crate::events::PROP_CANC,), (proposal_id, now));
     Ok(())
 }
 
@@ -297,7 +297,7 @@ pub fn expire_treasury_proposal(env: &Env, proposal_id: u32) -> Result<(), Error
         proposal.status = ProposalStatus::Expired;
         storage::set_treasury_proposal(env, &proposal);
         env.events().publish(
-            (symbol_short!("tre_exp"),),
+            (crate::events::TRE_EXP,),
             (proposal_id, proposal.proposer),
         );
         Ok(())

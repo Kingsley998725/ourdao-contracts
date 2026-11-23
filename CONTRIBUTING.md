@@ -7,6 +7,7 @@ Please read this in full before opening a pull request.
 ## Table of contents
 
 - [Before you write code](#before-you-write-code)
+- [Stellar Wave](#stellar-wave)
 - [Local setup](#local-setup)
 - [Running the checks CI runs](#running-the-checks-ci-runs)
 - [What a good pull request looks like](#what-a-good-pull-request-looks-like)
@@ -22,6 +23,16 @@ Please read this in full before opening a pull request.
 Pull requests that arrive without an assigned issue will be closed with a pointer back here. The one exception is a genuine security fix, which should follow [Reporting a security issue](#reporting-a-security-issue) instead.
 
 If you think something should change but there's no issue for it, open one and describe the problem before writing the fix. A PR is a proposed solution; the issue is where we agree on the problem.
+
+## Stellar Wave
+
+Stellar Wave contributions should stay small and easy to review: work on **one assigned issue per pull request**. If the work uncovers another task, open a separate issue and handle it in a separate PR.
+
+Name your branch `fix/issue-<n>-slug`, using the issue number and a short description (for example, `fix/issue-244-wave-task-template`). Keep your branch current by rebasing it onto the latest `main`; do not merge `main` into your feature branch.
+
+Add or update tests for behavior you change, and make sure the relevant tests pass. Before pushing, run `make ci` to check formatting, lint, tests, coverage, compilation, and the WebAssembly build locally.
+
+Include `Closes #<n>` in the PR description for the issue addressed. For a PR resolving multiple issues, use a separate `Closes #<n>` line for each issue.
 
 ## Local setup
 
@@ -61,7 +72,7 @@ cargo test --locked                                          # full test suite
 cargo build --locked --target wasm32v1-none --release        # wasm build
 ```
 
-`make ci` runs all four in sequence — use it as your one-command pre-push check. The individual shorthands `make fmt`, `make clippy`, `make test`, and `make build` map flag-for-flag to their CI equivalents.
+`make ci` runs the all-targets check, formatting, lint, tests, coverage, and WebAssembly build — use it as your one-command pre-push check. The `make check` and `make coverage` targets reproduce their CI commands; `make fmt`, `make clippy`, `make test`, and `make build` map to the corresponding CI steps. The Docker-based reproducible build remains a separate CI gate.
 
 A separate `audit` job runs `cargo audit` against `Cargo.lock` on every push and PR (`cargo install cargo-audit --locked` once locally, then `cargo audit` or `make audit`). It's a distinct job on purpose: an advisory landing against a dependency we already know about and can't move on (see the `ed25519-dalek` note below) shouldn't block merging unrelated PRs, but it still needs to stay visible.
 

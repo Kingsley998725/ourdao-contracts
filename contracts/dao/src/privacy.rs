@@ -6,7 +6,7 @@
 //!
 //! Applies to treasury proposals created with `private = true`.
 
-use soroban_sdk::{symbol_short, xdr::ToXdr, Address, Bytes, BytesN, Env};
+use soroban_sdk::{xdr::ToXdr, Address, Bytes, BytesN, Env};
 
 use crate::error::Error;
 use crate::storage;
@@ -108,7 +108,7 @@ pub fn commit_vote(
 
     storage::set_commit(env, proposal_id, &voter, &commitment);
     env.events()
-        .publish((symbol_short!("committed"),), (proposal_id, voter));
+        .publish((crate::events::COMMITTED,), (proposal_id, voter));
     Ok(())
 }
 
@@ -150,7 +150,7 @@ pub fn reveal_vote(
     // threshold is met, executes the withdrawal.
     storage::remove_commit(env, proposal_id, &voter);
     env.events().publish(
-        (symbol_short!("revealed"),),
+        (crate::events::REVEALED,),
         (proposal_id, voter.clone(), support),
     );
     treasury::tally(env, proposal, &voter, support)

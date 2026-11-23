@@ -1,4 +1,4 @@
-use soroban_sdk::{symbol_short, Address, Env, Vec};
+use soroban_sdk::{Address, Env, Vec};
 
 use crate::error::Error;
 use crate::storage::{self, extend_instance};
@@ -68,7 +68,7 @@ pub fn register_member(env: &Env, member: Address) -> Result<(), Error> {
     util::token_client(env)?.transfer(&member, util::contract_address(env), &fee);
 
     env.events()
-        .publish((symbol_short!("joined"),), (member, fee));
+        .publish((crate::events::JOINED,), (member, fee));
     Ok(())
 }
 
@@ -130,7 +130,7 @@ pub fn exit_dao(env: &Env, member: Address) -> Result<(), Error> {
             .persistent()
             .remove(&storage::DataKey::NameOf(member.clone()));
         env.events()
-            .publish((symbol_short!("name_rel"),), (name, member.clone()));
+            .publish((crate::events::NAME_REL,), (name, member.clone()));
     }
 
     record.status = MemberStatus::Inactive;
@@ -156,14 +156,14 @@ pub fn exit_dao(env: &Env, member: Address) -> Result<(), Error> {
         );
         if payout.asset != base_asset {
             env.events().publish(
-                (symbol_short!("exit_a"),),
+                (crate::events::EXIT_A,),
                 (member.clone(), payout.asset, payout.balance),
             );
         }
     }
 
     env.events()
-        .publish((symbol_short!("exited"),), (member, share, pending));
+        .publish((crate::events::EXITED,), (member, share, pending));
     Ok(())
 }
 
@@ -199,7 +199,7 @@ fn claim_rewards_in_asset_internal(
     let now = env.ledger().timestamp();
     if asset == storage::get_token(env)? {
         env.events().publish(
-            (symbol_short!("claimed"), member.clone(), pending),
+            (crate::events::CLAIMED, member.clone(), pending),
             StakingRewardClaimed {
                 member,
                 amount: pending,
@@ -208,7 +208,7 @@ fn claim_rewards_in_asset_internal(
         );
     } else {
         env.events()
-            .publish((symbol_short!("clm_ast"),), (member, asset, pending));
+            .publish((crate::events::CLM_AST,), (member, asset, pending));
     }
     Ok(pending)
 }
@@ -301,6 +301,6 @@ pub fn delegate_vote(env: &Env, delegator: Address, delegatee: Address) -> Resul
 
     storage::set_delegation(env, &delegator, &delegatee);
     env.events()
-        .publish((symbol_short!("delegate"),), (delegator, delegatee));
+        .publish((crate::events::DELEGATE,), (delegator, delegatee));
     Ok(())
 }
